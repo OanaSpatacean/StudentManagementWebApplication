@@ -1,12 +1,12 @@
 package com.aclabs.aclabs2023.controllers;
-
 import com.aclabs.aclabs2023.model.Student;
 import com.aclabs.aclabs2023.services.StudentService;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
-
 
 @RestController
 public class StudentController {
@@ -14,22 +14,27 @@ public class StudentController {
     StudentService studentService; // our Controller to delegate the logic implementation to a Service class
 
     @GetMapping("/getAllStudents")
-    public List<Student> getAllStudents() {
-        return studentService.getAllStudents();
+    public ResponseEntity<List<Student>> getAllStudents() {
+        return new ResponseEntity<>(studentService.getAllStudents(), HttpStatus.OK);
     }
 
     @PostMapping("/addStudent")
-    public void addStudent(@RequestBody Student student) {
+    public ResponseEntity<Object> addStudent(@RequestBody Student student) {
         studentService.addStudent(student);
+        return new ResponseEntity<>("Student with id " + student.getId() + " was created.", HttpStatus.OK);
     }
 
     @PutMapping("/updateStudent/{id}")
-    public void updateStudent(@RequestBody Student updatedStudent){
-        studentService.updateStudent(updatedStudent);
+    public ResponseEntity<Object> updateStudent(@RequestBody Student updatedStudent){
+       studentService.studentExists(updatedStudent.getId());
+       studentService.updateStudent(updatedStudent);
+       return new ResponseEntity<>("Student with id " + updatedStudent.getId() + " was updated.", HttpStatus.OK);
     }
 
     @DeleteMapping("/deleteStudent/{id}")
-    public void deleteStudent(@PathVariable String id){
+    public ResponseEntity<Object> deleteStudent(@PathVariable String id){
+        studentService.studentExists(id);
         studentService.deleteStudent(id);
+        return new ResponseEntity<>("Student with id " + id + " was deleted.", HttpStatus.OK);
     }
 }
